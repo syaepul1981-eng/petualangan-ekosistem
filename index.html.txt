@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Petualangan Penjelajah Ekosistem - IPAS Kelas V MI</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Fredoka & Nunito -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #e0f7fa 0%, #e8f5e9 50%, #fff9c4 100%);
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+        h1, h2, h3, .font-title {
+            font-family: 'Fredoka', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        /* Animasi Melayang Halus */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        /* Animasi Pop In */
+        @keyframes popIn {
+            0% { transform: scale(0.92); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: popIn 0.3s ease-out forwards;
+        }
+        /* Animasi Goyang Saat Salah */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25%, 75% { transform: translateX(-6px); }
+            50% { transform: translateX(6px); }
+        }
+        .animate-shake {
+            animation: shake 0.35s ease-in-out;
+        }
+        /* Efek Tombol 3D Kartun Ramah Sentuhan HP */
+        .btn-3d {
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            box-shadow: 0 5px 0 rgba(0,0,0,0.18);
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .btn-3d:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.18);
+        }
+        /* Pola Latar Belakang */
+        .bg-pattern {
+            background-color: #f1f8e9;
+            background-image: radial-gradient(#81c784 1.5px, transparent 1.5px), radial-gradient(#4dd0e1 1.5px, #f1f8e9 1.5px);
+            background-size: 36px 36px;
+            background-position: 0 0, 18px 18px;
+        }
+        /* CSS Fallback Dasar jika CDN Tailwind lambat di jaringan HP */
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="bg-pattern text-slate-800 flex flex-col justify-between min-h-screen">
+
+    <!-- Dekorasi Awan & Matahari Atas (Hanya layar besar agar HP ringan) -->
+    <div class="fixed top-4 left-4 pointer-events-none opacity-80 hidden md:block animate-float">
+        <svg width="90" height="55" viewBox="0 0 100 60" fill="none">
+            <path d="M25 50H75C86.0457 50 95 41.0457 95 30C95 19.6331 87.114 11.1095 76.9999 10.1023C73.3374 4.04199 66.6528 0 59 0C48.8781 0 40.4222 7.12924 38.4521 16.6494C36.7368 16.2244 34.943 16 33.1 16C20.8945 16 11 25.8945 11 38.1C11 44.6722 17.268 50 25 50Z" fill="#FFFFFF"/>
+        </svg>
+    </div>
+
+    <!-- HEADER STATUS BAR (Responsif untuk layar HP kecil) -->
+    <header id="game-header" class="hidden sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b-4 border-emerald-400 shadow-md px-3 py-2 sm:px-4 sm:py-3">
+        <div class="max-w-5xl mx-auto flex items-center justify-between gap-2">
+            <!-- Tombol Beranda & Suara -->
+            <div class="flex items-center gap-1.5 shrink-0">
+                <button type="button" onclick="confirmReturnHome()" class="bg-amber-100 active:bg-amber-200 text-amber-800 font-bold px-2.5 py-2 rounded-xl border-2 border-amber-300 flex items-center gap-1 text-xs sm:text-sm">
+                    <span>🏠</span> <span class="hidden sm:inline">Beranda</span>
+                </button>
+                <button type="button" id="sound-toggle" onclick="toggleSound()" class="bg-sky-100 active:bg-sky-200 text-sky-800 font-bold px-2.5 py-2 rounded-xl border-2 border-sky-300 flex items-center text-xs sm:text-sm">
+                    <span id="sound-icon">🔊</span>
+                </button>
+            </div>
+
+            <!-- Indikator Kemajuan 3 Babak (Ringkas di HP) -->
+            <div class="flex items-center gap-1 sm:gap-2 bg-emerald-50 px-2 py-1 rounded-xl border border-emerald-200 overflow-x-auto">
+                <div id="step-1" class="flex items-center gap-1 px-2 py-1 rounded-lg font-bold text-[11px] sm:text-sm bg-emerald-500 text-white whitespace-nowrap">
+                    <span>1️⃣</span> <span class="hidden xs:inline sm:inline">Biotik</span>
+                </div>
+                <span class="text-emerald-400 font-bold text-xs">➔</span>
+                <div id="step-2" class="flex items-center gap-1 px-2 py-1 rounded-lg font-bold text-[11px] sm:text-sm bg-slate-200 text-slate-500 whitespace-nowrap">
+                    <span>2️⃣</span> <span class="hidden xs:inline sm:inline">Rantai</span>
+                </div>
+                <span class="text-emerald-400 font-bold text-xs">➔</span>
+                <div id="step-3" class="flex items-center gap-1 px-2 py-1 rounded-lg font-bold text-[11px] sm:text-sm bg-slate-200 text-slate-500 whitespace-nowrap">
+                    <span>3️⃣</span> <span class="hidden xs:inline sm:inline">Alam</span>
+                </div>
+            </div>
+
+            <!-- Papan Skor Langsung -->
+            <div class="flex items-center gap-1.5 bg-gradient-to-r from-amber-400 to-orange-400 text-white px-3 py-1 rounded-xl shadow border border-amber-200 shrink-0">
+                <span class="text-base sm:text-xl">⭐</span>
+                <div class="leading-none">
+                    <div class="text-[9px] uppercase font-extrabold opacity-90">Skor</div>
+                    <div id="live-score" class="font-title text-lg sm:text-2xl font-bold">0</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- KONTEN UTAMA -->
+    <main class="flex-grow flex items-center justify-center p-3 sm:p-6 w-full">
+        <div class="w-full max-w-4xl">
+
+            <!-- ========================================================= -->
+            <!-- LAYAR 0: HALAMAN AWAL (START SCREEN)                      -->
+            <!-- ========================================================= -->
+            <section id="screen-start" class="bg-white rounded-3xl shadow-xl border-4 border-emerald-400 p-5 sm:p-10 text-center animate-pop relative overflow-hidden">
+                <div class="absolute top-0 left-0 right-0 h-2.5 bg-gradient-to-r from-emerald-400 via-teal-400 to-amber-400"></div>
+
+                <!-- Karakter Kartun Penjelajah Cilik MI (SVG) -->
+                <div class="flex justify-center mb-2 animate-float">
+                    <svg width="100" height="100" viewBox="0 0 140 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="70" cy="70" r="64" fill="#E8F5E9" stroke="#4CAF50" stroke-width="4"/>
+                        <path d="M25 85C15 65 30 45 48 52C38 68 35 78 25 85Z" fill="#66BB6A"/>
+                        <path d="M115 85C125 65 110 45 92 52C102 68 105 78 115 85Z" fill="#66BB6A"/>
+                        <path d="M42 125C42 103 54 94 70 94C86 94 98 103 98 125H42Z" fill="#8D6E63"/>
+                        <path d="M56 96L70 114L84 96H56Z" fill="#EF5350"/>
+                        <path d="M62 96L70 106L78 96H62Z" fill="#FFFFFF"/>
+                        <circle cx="70" cy="66" r="26" fill="#FFCCBC"/>
+                        <path d="M44 56C44 41 55 32 70 32C85 32 96 41 96 56H44Z" fill="#2E7D32"/>
+                        <rect x="38" y="54" width="64" height="6" rx="3" fill="#1B5E20"/>
+                        <circle cx="61" cy="65" r="3.5" fill="#263238"/>
+                        <circle cx="79" cy="65" r="3.5" fill="#263238"/>
+                        <circle cx="62" cy="64" r="1.2" fill="#FFFFFF"/>
+                        <circle cx="80" cy="64" r="1.2" fill="#FFFFFF"/>
+                        <ellipse cx="55" cy="72" rx="4" ry="2.5" fill="#FF8A80" opacity="0.6"/>
+                        <ellipse cx="85" cy="72" rx="4" ry="2.5" fill="#FF8A80" opacity="0.6"/>
+                        <path d="M63 75C65 79 75 79 77 75" stroke="#263238" stroke-width="3" stroke-linecap="round"/>
+                        <circle cx="102" cy="95" r="14" fill="#E1F5FE" stroke="#FFB300" stroke-width="4"/>
+                        <line x1="92" y1="105" x2="82" y2="116" stroke="#6D4C41" stroke-width="5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+
+                <!-- Badge Salam Pembuka -->
+                <div class="inline-block bg-emerald-100 text-emerald-800 font-extrabold px-3 py-1 rounded-full text-xs sm:text-sm mb-2 border border-emerald-300">
+                    Assalamu’alaikum Warahmatullahi Wabarakatuh 🌿
+                </div>
+
+                <!-- Judul Utama -->
+                <h1 class="font-title text-2xl sm:text-4xl md:text-5xl font-bold text-emerald-700 tracking-wide mb-3">
+                    Petualangan Penjelajah Ekosistem
+                </h1>
+
+                <!-- KARTU IDENTITAS PEMBUAT GAME -->
+                <div class="max-w-xl mx-auto bg-gradient-to-br from-emerald-50 via-teal-50 to-amber-50 rounded-2xl border-2 border-emerald-300 p-3.5 sm:p-5 mb-5 text-left">
+                    <div class="flex items-center gap-2 text-emerald-800 font-bold text-xs sm:text-sm uppercase tracking-wider border-b border-emerald-200 pb-1.5 mb-2.5">
+                        <span>📋</span> <span>Identitas Media Pembelajaran</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4 text-xs sm:text-sm">
+                        <div>
+                            <span class="text-slate-500 font-semibold block text-[11px]">Judul Game:</span>
+                            <span class="font-extrabold text-emerald-800">Petualangan Penjelajah Ekosistem</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-500 font-semibold block text-[11px]">Mata Pelajaran:</span>
+                            <span class="font-extrabold text-slate-800">IPAS Kelas V MI</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-500 font-semibold block text-[11px]">Semester:</span>
+                            <span class="font-extrabold text-slate-800">1 (Ganjil)</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-500 font-semibold block text-[11px]">Tema:</span>
+                            <span class="font-extrabold text-teal-800">Harmoni Alam dan Lingkungan Sekitar</span>
+                        </div>
+                        <div class="sm:col-span-2 pt-1.5 border-t border-emerald-200/70 flex flex-wrap justify-between gap-2">
+                            <div>
+                                <span class="text-slate-500 font-semibold block text-[11px]">Dibuat oleh:</span>
+                                <span class="font-extrabold text-amber-800">Syaepul Rizwan</span>
+                            </div>
+                            <div class="sm:text-right">
+                                <span class="text-slate-500 font-semibold block text-[11px]">Nama Sekolah:</span>
+                                <span class="font-extrabold text-emerald-900">MIS Muslimin Cikadu</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ringkasan 3 Babak Petualangan -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-6 text-left">
+                    <div class="bg-sky-50 border-2 border-sky-200 rounded-2xl p-3 flex items-center sm:items-start gap-2.5">
+                        <span class="text-xl bg-sky-200 p-2 rounded-xl shrink-0">🔍</span>
+                        <div>
+                            <h3 class="font-title font-bold text-sky-800 text-sm">Babak 1</h3>
+                            <p class="text-xs text-slate-600 font-semibold">Kenali Komponen Biotik & Abiotik</p>
+                        </div>
+                    </div>
+                    <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-3 flex items-center sm:items-start gap-2.5">
+                        <span class="text-xl bg-amber-200 p-2 rounded-xl shrink-0">🔗</span>
+                        <div>
+                            <h3 class="font-title font-bold text-amber-800 text-sm">Babak 2</h3>
+                            <p class="text-xs text-slate-600 font-semibold">Susun Urutan Rantai Makanan</p>
+                        </div>
+                    </div>
+                    <div class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-3 flex items-center sm:items-start gap-2.5">
+                        <span class="text-xl bg-emerald-200 p-2 rounded-xl shrink-0">🌱</span>
+                        <div>
+                            <h3 class="font-title font-bold text-emerald-800 text-sm">Babak 3</h3>
+                            <p class="text-xs text-slate-600 font-semibold">Pahlawan Penjaga Alam Madrasah</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tombol Mulai Petualangan -->
+                <button type="button" onclick="startGame()" class="btn-3d w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-title text-xl sm:text-2xl font-bold px-8 py-4 rounded-2xl inline-flex items-center justify-center gap-3">
+                    <span>🚀</span> <span>Mulai Petualangan!</span>
+                </button>
+            </section>
+
+            <!-- ========================================================= -->
+            <!-- LAYAR 1: BABAK 1 - KENALI PENGHUNI EKOSISTEM              -->
+            <!-- ========================================================= -->
+            <section id="screen-stage1" class="hidden bg-white rounded-3xl shadow-xl border-4 border-sky-400 p-4 sm:p-8 animate-pop">
+                <div class="flex items-center justify-between gap-2 border-b-2 border-sky-100 pb-3 mb-4">
+                    <div>
+                        <span class="bg-sky-100 text-sky-800 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full uppercase">Babak 1 dari 3</span>
+                        <h2 class="font-title text-xl sm:text-3xl font-bold text-sky-800 mt-1">Kenali Penghuni Ekosistem</h2>
+                    </div>
+                    <div class="bg-sky-50 border-2 border-sky-200 px-3 py-1.5 rounded-xl text-center shrink-0">
+                        <span class="text-[10px] font-bold text-sky-600 block">Soal</span>
+                        <span id="s1-progress" class="font-title text-lg sm:text-xl font-bold text-sky-900">1 / 6</span>
+                    </div>
+                </div>
+                <p class="text-slate-600 text-xs sm:text-base font-semibold mb-4">Kelompokkan gambar di bawah ke dalam komponen <b>Biotik</b> (makhluk hidup) atau <b>Abiotik</b> (benda tak hidup)!</p>
+
+                <!-- Kartu Gambar Objek Ekosistem -->
+                <div id="s1-card" class="bg-gradient-to-b from-sky-50 to-emerald-50 border-4 border-dashed border-sky-300 rounded-3xl p-5 sm:p-7 text-center max-w-md mx-auto mb-5">
+                    <div id="s1-illustration" class="flex justify-center mb-3 animate-float"></div>
+                    <h3 id="s1-item-name" class="font-title text-xl sm:text-3xl font-bold text-slate-800 mb-1">Nama Objek</h3>
+                    <p id="s1-item-hint" class="text-xs sm:text-sm text-slate-500 font-semibold">Deskripsi singkat objek</p>
+                </div>
+
+                <!-- Pilihan Kategori Biotik vs Abiotik -->
+                <div id="s1-buttons" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto">
+                    <button type="button" onclick="checkStage1('biotik')" class="btn-3d bg-emerald-500 text-white p-4 rounded-2xl flex items-center justify-center gap-3 border-2 border-emerald-300">
+                        <span class="text-3xl">🦋</span>
+                        <div class="text-left">
+                            <div class="font-title text-lg sm:text-xl font-bold">Komponen BIOTIK</div>
+                            <div class="text-xs text-emerald-100 font-semibold">Makhluk Hidup (Tumbuh & Bernapas)</div>
+                        </div>
+                    </button>
+
+                    <button type="button" onclick="checkStage1('abiotik')" class="btn-3d bg-amber-500 text-white p-4 rounded-2xl flex items-center justify-center gap-3 border-2 border-amber-300">
+                        <span class="text-3xl">☀️</span>
+                        <div class="text-left">
+                            <div class="font-title text-lg sm:text-xl font-bold">Komponen ABIOTIK</div>
+                            <div class="text-xs text-amber-100 font-semibold">Benda Tak Hidup (Pendukung Alam)</div>
+                        </div>
+                    </button>
+                </div>
+            </section>
+
+            <!-- ========================================================= -->
+            <!-- LAYAR 2: BABAK 2 - PETUALANGAN RANTAI MAKANAN             -->
+            <!-- ========================================================= -->
+            <section id="screen-stage2" class="hidden bg-white rounded-3xl shadow-xl border-4 border-amber-400 p-4 sm:p-8 animate-pop">
+                <div class="flex items-center justify-between gap-2 border-b-2 border-amber-100 pb-3 mb-4">
+                    <div>
+                        <span class="bg-amber-100 text-amber-800 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full uppercase">Babak 2 dari 3</span>
+                        <h2 id="s2-title" class="font-title text-xl sm:text-3xl font-bold text-amber-800 mt-1">Petualangan Rantai Makanan</h2>
+                    </div>
+                    <div class="bg-amber-50 border-2 border-amber-200 px-3 py-1.5 rounded-xl text-center shrink-0">
+                        <span class="text-[10px] font-bold text-amber-600 block">Ekosistem</span>
+                        <span id="s2-progress" class="font-title text-lg sm:text-xl font-bold text-amber-900">1 / 3</span>
+                    </div>
+                </div>
+                <p class="text-slate-600 text-xs sm:text-base font-semibold mb-4">Ketuk gambar makhluk hidup secara <b>berurutan</b> mulai dari <b>Produsen</b> hingga <b>Konsumen Puncak</b>!</p>
+
+                <!-- Slot Urutan Rantai Makanan -->
+                <div class="bg-amber-50/80 border-2 border-amber-300 rounded-2xl p-3 sm:p-4 mb-5">
+                    <div class="flex items-center justify-between mb-2.5 gap-2">
+                        <span class="text-xs font-extrabold text-amber-900 uppercase">Urutan Pilihanmu:</span>
+                        <button type="button" onclick="resetStage2Selection()" class="text-xs bg-white active:bg-red-50 text-red-600 font-bold px-3 py-1.5 rounded-xl border border-red-200">
+                            🔄 Ulangi Urutan
+                        </button>
+                    </div>
+                    
+                    <div id="s2-slots" class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3"></div>
+                </div>
+
+                <!-- Pilihan Kartu Makhluk Hidup (Acak) -->
+                <div class="mb-2 text-center">
+                    <span class="text-[11px] font-bold text-slate-500 uppercase">👇 Ketuk Kartu di Bawah Secara Berurutan 👇</span>
+                </div>
+                <div id="s2-choices" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4"></div>
+            </section>
+
+            <!-- ========================================================= -->
+            <!-- LAYAR 3: BABAK 3 - PAHLAWAN PENJAGA ALAM                  -->
+            <!-- ========================================================= -->
+            <section id="screen-stage3" class="hidden bg-white rounded-3xl shadow-xl border-4 border-emerald-500 p-4 sm:p-8 animate-pop">
+                <div class="flex items-center justify-between gap-2 border-b-2 border-emerald-100 pb-3 mb-4">
+                    <div>
+                        <span class="bg-emerald-100 text-emerald-800 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full uppercase">Babak 3 dari 3</span>
+                        <h2 class="font-title text-xl sm:text-3xl font-bold text-emerald-800 mt-1">Pahlawan Penjaga Alam</h2>
+                    </div>
+                    <div class="bg-emerald-50 border-2 border-emerald-200 px-3 py-1.5 rounded-xl text-center shrink-0">
+                        <span class="text-[10px] font-bold text-emerald-600 block">Misi</span>
+                        <span id="s3-progress" class="font-title text-lg sm:text-xl font-bold text-emerald-900">1 / 4</span>
+                    </div>
+                </div>
+
+                <!-- Kotak Studi Kasus Lingkungan -->
+                <div class="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-2xl p-4 sm:p-6 mb-5 flex flex-col sm:flex-row items-center gap-3 sm:gap-4 text-center sm:text-left">
+                    <div id="s3-icon" class="text-4xl sm:text-6xl bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-emerald-200 shrink-0">
+                        🏫
+                    </div>
+                    <div>
+                        <span id="s3-badge" class="inline-block bg-teal-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-lg mb-1.5">Lingkungan Madrasah</span>
+                        <h3 id="s3-question" class="font-title text-base sm:text-xl font-bold text-slate-800 leading-snug">
+                            Pertanyaan studi kasus lingkungan akan muncul di sini.
+                        </h3>
+                    </div>
+                </div>
+
+                <!-- Pilihan Tindakan -->
+                <div id="s3-options" class="space-y-3"></div>
+            </section>
+
+            <!-- ========================================================= -->
+            <!-- LAYAR 4: HALAMAN AKHIR & HIKMAH ISLAMI                    -->
+            <!-- ========================================================= -->
+            <section id="screen-end" class="hidden bg-white rounded-3xl shadow-xl border-4 border-amber-400 p-5 sm:p-10 text-center animate-pop relative overflow-hidden">
+                <div class="absolute top-0 left-0 right-0 h-2.5 bg-gradient-to-r from-amber-400 via-emerald-400 to-teal-400"></div>
+
+                <div class="flex justify-center mb-3 animate-float">
+                    <div class="bg-amber-100 border-4 border-amber-300 rounded-full p-4 shadow-md">
+                        <span class="text-5xl sm:text-7xl">🏆</span>
+                    </div>
+                </div>
+
+                <h2 class="font-title text-2xl sm:text-4xl font-bold text-emerald-800 mb-1">
+                    Alhamdulillah, Petualangan Selesai!
+                </h2>
+                <p class="text-slate-600 text-xs sm:text-base font-semibold mb-5">Hebat! Kamu telah menyelesaikan seluruh misi penjelajah ekosistem.</p>
+
+                <!-- Kartu Nilai Akhir & Predikat -->
+                <div class="max-w-lg mx-auto bg-gradient-to-br from-amber-50 to-yellow-100 border-4 border-amber-300 rounded-3xl p-5 mb-5">
+                    <div class="text-xs uppercase font-extrabold tracking-widest text-amber-800 mb-1">Nilai Akhir Kamu</div>
+                    <div id="final-score" class="font-title text-5xl sm:text-7xl font-bold text-amber-600 mb-1">100</div>
+                    <div id="final-stars" class="text-2xl sm:text-3xl mb-2">⭐⭐⭐</div>
+                    <div id="final-predicate" class="inline-block bg-emerald-600 text-white font-title text-sm sm:text-xl font-bold px-4 py-2 rounded-2xl shadow">
+                        Predikat: Khalifah Penjaga Alam Terbaik!
+                    </div>
+                    <p id="final-stats" class="text-xs sm:text-sm text-slate-600 font-bold mt-2.5">
+                        Jawaban Benar: 13 dari 13 Tantangan
+                    </p>
+                </div>
+
+                <!-- PESAN HIKMAH ISLAMI -->
+                <div class="max-w-2xl mx-auto bg-emerald-50 border-2 border-emerald-400 rounded-2xl p-4 sm:p-6 mb-5">
+                    <div class="flex items-center justify-center gap-2 text-emerald-800 font-title font-bold text-base sm:text-lg mb-2">
+                        <span>🕌</span> <span>Pesan Hikmah Islami</span> <span>🌿</span>
+                    </div>
+                    <blockquote class="text-emerald-950 font-bold text-sm sm:text-lg italic leading-relaxed">
+                        "Alam semesta adalah ciptaan Allah Swt. yang menjadi amanah bagi manusia. Mari kita jaga lingkungan, karena menjaga alam merupakan salah satu bentuk rasa syukur kepada Allah Swt."
+                    </blockquote>
+                </div>
+
+                <!-- KREDIT IDENTITAS PEMBUAT GAME -->
+                <div class="max-w-xl mx-auto bg-slate-50 border-2 border-slate-200 rounded-2xl p-3.5 sm:p-4 mb-6 text-left text-xs sm:text-sm">
+                    <div class="font-bold text-slate-700 border-b border-slate-200 pb-1.5 mb-2 flex items-center gap-1.5">
+                        <span>🎓</span> <span>Kredit Pembuat Game Edukasi</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-slate-700">
+                        <div><b>Judul Game:</b> Petualangan Penjelajah Ekosistem</div>
+                        <div><b>Mata Pelajaran:</b> IPAS Kelas V MI</div>
+                        <div><b>Semester:</b> 1 (Ganjil)</div>
+                        <div><b>Tema:</b> Harmoni Alam dan Lingkungan Sekitar</div>
+                        <div><b>Dibuat oleh:</b> Syaepul Rizwan</div>
+                        <div><b>Nama Sekolah:</b> MIS Muslimin Cikadu</div>
+                    </div>
+                </div>
+
+                <!-- Tombol Ulangi Permainan -->
+                <button type="button" onclick="restartGame()" class="btn-3d w-full sm:w-auto bg-gradient-to-r from-amber-500 to-orange-500 text-white font-title text-lg sm:text-xl font-bold px-8 py-4 rounded-2xl inline-flex items-center justify-center gap-3">
+                    <span>🔄</span> <span>Mainkan Lagi</span>
+                </button>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- ========================================================= -->
+    <!-- MODAL UMPAN BALIK JAWABAN (BENAR / SALAH) & TOMBOL LANJUT -->
+    <!-- ========================================================= -->
+    <div id="feedback-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">
+        <div id="feedback-box" class="bg-white rounded-3xl max-w-md w-full p-5 sm:p-7 text-center shadow-2xl border-4 border-emerald-400 animate-pop">
+            <div id="fb-emoji" class="text-5xl sm:text-6xl mb-2">🎉</div>
+            <h3 id="fb-title" class="font-title text-xl sm:text-3xl font-bold text-emerald-700 mb-2">MasyaAllah, Benar!</h3>
+            <p id="fb-message" class="text-slate-600 font-semibold text-xs sm:text-base mb-5 leading-relaxed">
+                Penjelasan edukatif muncul di sini.
+            </p>
+            <button type="button" id="fb-next-btn" onclick="handleNextStep()" class="btn-3d w-full bg-emerald-500 text-white font-title text-lg sm:text-xl font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2">
+                <span>Lanjut</span> <span>➡️</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- MODAL KONFIRMASI KEMBALI KE BERANDA                       -->
+    <!-- ========================================================= -->
+    <div id="home-confirm-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-5 text-center shadow-2xl border-4 border-amber-400 animate-pop">
+            <div class="text-4xl mb-2">🏠</div>
+            <h3 class="font-title text-xl font-bold text-slate-800 mb-2">Kembali ke Beranda?</h3>
+            <p class="text-slate-600 font-semibold text-xs sm:text-sm mb-5">Kemajuan permainan saat ini akan diulang dari awal.</p>
+            <div class="grid grid-cols-2 gap-3">
+                <button type="button" onclick="closeHomeModal()" class="btn-3d bg-slate-200 text-slate-800 font-title font-bold py-3 rounded-xl">
+                    Batal
+                </button>
+                <button type="button" onclick="goHomeConfirmed()" class="btn-3d bg-amber-500 text-white font-title font-bold py-3 rounded-xl">
+                    Ya, Kembali
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER RINGKAS -->
+    <footer class="text-center py-2.5 text-[11px] sm:text-xs text-slate-600 font-semibold px-2">
+        Media Pembelajaran Interaktif IPAS Kelas V MI • MIS Muslimin Cikadu
+    </footer>
+
+    <!-- ========================================================= -->
+    <!-- LOGIKA PERMAINAN & EFEK SUARA NATIVE WEB AUDIO API        -->
+    <!-- (Ringan & 100% Kompatibel di Semua Browser HP / Android / iOS) -->
+    <!-- ========================================================= -->
+    <script>
+        // --- 1. SISTEM EFEK SUARA NATIVE WEB AUDIO API (TANPA LIBRARY BERAT) ---
+        let soundEnabled = true;
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    audioCtx = new AudioContextClass();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume().catch(() => {});
+            }
+            return audioCtx;
+        }
+
+        function playTone(freq, duration, delay = 0, type = 'sine') {
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+                
+                gain.gain.setValueAtTime(0.15, ctx.currentTime + delay);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + duration);
+                
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                osc.start(ctx.currentTime + delay);
+                osc.stop(ctx.currentTime + delay + duration);
+            } catch (e) {
+                // Abaikan jika perangkat dalam mode senyap
+            }
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            if (type === 'click') {
+                playTone(523.25, 0.08, 0, 'sine'); // C5
+            } else if (type === 'correct') {
+                playTone(523.25, 0.12, 0, 'triangle'); // C5
+                playTone(659.25, 0.12, 0.09, 'triangle'); // E5
+                playTone(783.99, 0.22, 0.18, 'triangle'); // G5
+            } else if (type === 'wrong') {
+                playTone(329.63, 0.15, 0, 'sawtooth'); // E4
+                playTone(261.63, 0.25, 0.14, 'sawtooth'); // C4
+            } else if (type === 'win') {
+                playTone(523.25, 0.12, 0, 'triangle');
+                playTone(659.25, 0.12, 0.11, 'triangle');
+                playTone(783.99, 0.12, 0.22, 'triangle');
+                playTone(1046.50, 0.35, 0.33, 'triangle');
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('sound-icon').textContent = soundEnabled ? '🔊' : '🔇';
+            if (soundEnabled) playSound('click');
+        }
+
+        // --- 2. DATA BANK SOAL & ILUSTRASI SVG ---
+        const stage1Data = [
+            {
+                name: "Tanaman Padi",
+                hint: "Tumbuh subur di sawah dan menghasilkan beras.",
+                type: "biotik",
+                explanation: "Tanaman padi adalah komponen BIOTIK karena merupakan makhluk hidup yang dapat tumbuh, bernapas, dan berfotosintesis.",
+                svg: `<svg width="96" height="96" viewBox="0 0 120 120">
+                        <circle cx="60" cy="60" r="54" fill="#DCEDC8"/>
+                        <path d="M60 100V45" stroke="#558B2F" stroke-width="5" stroke-linecap="round"/>
+                        <path d="M60 85C40 80 32 65 38 55C48 62 55 72 60 85Z" fill="#7CB342"/>
+                        <path d="M60 75C80 70 88 55 82 45C72 52 65 62 60 75Z" fill="#8BC34A"/>
+                        <path d="M60 45C50 30 35 32 30 42" stroke="#FBC02D" stroke-width="4" fill="none" stroke-linecap="round"/>
+                        <ellipse cx="36" cy="36" rx="5" ry="3" fill="#FDD835"/>
+                        <ellipse cx="46" cy="34" rx="5" ry="3" fill="#FDD835"/>
+                        <ellipse cx="55" cy="38" rx="5" ry="3" fill="#FDD835"/>
+                      </svg>`
+            },
+            {
+                name: "Cahaya Matahari",
+                hint: "Menyinari bumi dan memberi kehangatan di pagi hari.",
+                type: "abiotik",
+                explanation: "Cahaya matahari adalah komponen ABIOTIK karena merupakan benda/energi tak hidup yang sangat dibutuhkan tumbuhan untuk berfotosintesis.",
+                svg: `<svg width="96" height="96" viewBox="0 0 120 120">
+                        <circle cx="60" cy="60" r="54" fill="#FFF9C4"/>
+                        <circle cx="60" cy="60" r="26" fill="#FFB300"/>
+                        <g stroke="#FF8F00" stroke-width="5" stroke-linecap="round">
+                            <line x1="60" y1="16" x2="60" y2="26"/>
+                            <line x1="60" y1="94" x2="60" y2="104"/>
+                            <line x1="16" y1="60" x2="26" y2="60"/>
+                            <line x1="94" y1="60" x2="104" y2="60"/>
+                            <line x1="29" y1="29" x2="36" y2="36"/>
+                            <line x1="84" y1="84" x2="91" y2="91"/>
+                            <line x1="91" y1="29" x2="84" y2="36"/>
+                            <line x1="36" y1="84" x2="29" y2="91"/>
+                        </g>
+                      </svg>`
+            },
+            {
+                name: "Katak Sawah",
+                hint: "Melompat lincah di sekitar kolam dan pematang sawah.",
+                type: "biotik",
+                explanation: "Katak sawah adalah komponen BIOTIK karena termasuk hewan (makhluk hidup) yang bergerak, makan, dan berkembang biak.",
+                svg: `<svg width="96" height="96" viewBox="0 0 120 120">
+                        <circle cx="60" cy="60" r="54" fill="#E0F2F1"/>
+                        <ellipse cx="60" cy="72" rx="32" ry="22" fill="#4CAF50"/>
+                        <ellipse cx="60" cy="77" rx="22" ry="13" fill="#C8E6C9"/>
+                        <circle cx="45" cy="50" r="10" fill="#4CAF50"/>
+                        <circle cx="75" cy="50" r="10" fill="#4CAF50"/>
+                        <circle cx="45" cy="49" r="5" fill="#FFFFFF"/>
+                        <circle cx="75" cy="49" r="5" fill="#FFFFFF"/>
+                        <circle cx="45" cy="49" r="2.5" fill="#212121"/>
+                        <circle cx="75" cy="49" r="2.5" fill="#212121"/>
+                        <path d="M48 70Q60 80 72 70" stroke="#1B5E20" stroke-width="3" fill="none" stroke-linecap="round"/>
+                      </svg>`
+            },
+            {
+                name: "Air Sungai",
+                hint: "Mengalir jernih dari pegunungan menuju hilir.",
+                type: "abiotik",
+                explanation: "Air sungai adalah komponen ABIOTIK karena merupakan zat/benda tak hidup yang menjadi tempat tinggal ikan dan sumber minum makhluk hidup.",
+                svg: `<svg width="96" height="96" viewBox="0 0 120 120">
+                        <circle cx="60" cy="60" r="54" fill="#E1F5FE"/>
+                        <path d="M60 22C60 22 32 56 32 76C32 91.464 44.536 104 60 104C75.464 104 88 91.464 88 76C88 56 60 22 60 22Z" fill="#29B6F6"/>
+                        <path d="M46 74C46 82 52 88 60 88" stroke="#E1F5FE" stroke-width="4" stroke-linecap="round" fill="none"/>
+                      </svg>`
+            },
+            {
+                name: "Batu & Tanah",
+                hint: "Tempat berpijak dan tumbuhnya akar pepohonan.",
+                type: "abiotik",
+                explanation: "Batu dan tanah adalah komponen ABIOTIK karena tidak bernapas dan tidak berkembang biak, namun menyediakan unsur hara bagi tumbuhan.",
+                svg: `<svg width="96" height="96" viewBox="0 0 120 120">
+                        <circle cx="60" cy="60" r="54" fill="#EFEBE9"/>
+                        <path d="M22 86C22 68 38 56 56 58C72 60 84 72 86 86H22Z" fill="#8D6E63"/>
+                        <path d="M62 88C64 74 76 66 88 68C98 70 104 78 104 88H62Z" fill="#A1887F"/>
+                        <ellipse cx="46" cy="70" rx="6" ry="3" fill="#BCAAA4"/>
+                      </svg>`
+            },
+            {
+                name: "Burung Pipit",
+                hint: "Terbang riang dan hinggap di dahan pohon.",
+                type: "biotik",
+                explanation: "Burung pipit adalah komponen BIOTIK karena merupakan makhluk hidup ciptaan Allah Swt. yang bergerak, makan biji-bijian, dan bertelur.",
+                svg: `<svg width="96" height="96" viewBox="0 0 120 120">
+                        <circle cx="60" cy="60" r="54" fill="#FFF3E0"/>
+                        <ellipse cx="62" cy="66" rx="26" ry="20" fill="#8D6E63"/>
+                        <circle cx="46" cy="54" r="14" fill="#A1887F"/>
+                        <polygon points="32,54 22,58 32,62" fill="#FFB300"/>
+                        <circle cx="43" cy="52" r="3" fill="#212121"/>
+                        <path d="M58 62C70 55 82 62 76 74C68 74 60 70 58 62Z" fill="#5D4037"/>
+                      </svg>`
+            }
+        ];
+
+        const stage2Data = [
+            {
+                ecosystem: "Ekosistem Sawah",
+                items: [
+                    { id: 1, name: "Padi", role: "Produsen", emoji: "🌾" },
+                    { id: 2, name: "Belalang", role: "Konsumen I", emoji: "🦗" },
+                    { id: 3, name: "Katak", role: "Konsumen II", emoji: "🐸" },
+                    { id: 4, name: "Ular Sawah", role: "Konsumen III", emoji: "🐍" }
+                ],
+                explanation: "Hebat! Urutan di sawah: Padi (produsen) dimakan Belalang (konsumen I), lalu Belalang dimakan Katak (konsumen II), dan Katak dimakan Ular Sawah (konsumen III)."
+            },
+            {
+                ecosystem: "Ekosistem Kebun Madrasah",
+                items: [
+                    { id: 1, name: "Tanaman Sawi", role: "Produsen", emoji: "🥬" },
+                    { id: 2, name: "Ulat Daun", role: "Konsumen I", emoji: "🐛" },
+                    { id: 3, name: "Burung Kutilang", role: "Konsumen II", emoji: "🐦" },
+                    { id: 4, name: "Elang", role: "Konsumen Puncak", emoji: "🦅" }
+                ],
+                explanation: "Tepat sekali! Tanaman Sawi membuat makanan sendiri (produsen), dimakan Ulat, lalu Ulat dimakan Burung Kutilang, dan Burung dimakan Elang."
+            },
+            {
+                ecosystem: "Ekosistem Kolam Air Tawar",
+                items: [
+                    { id: 1, name: "Lumut / Alga", role: "Produsen", emoji: "🌿" },
+                    { id: 2, name: "Ikan Kecil", role: "Konsumen I", emoji: "🐟" },
+                    { id: 3, name: "Ikan Gabus", role: "Konsumen II", emoji: "🐠" },
+                    { id: 4, name: "Bangau", role: "Konsumen Puncak", emoji: "🦩" }
+                ],
+                explanation: "Luar biasa! Di kolam, Lumut menjadi produsen, dimakan Ikan Kecil, kemudian Ikan Kecil dimakan Ikan Gabus, dan Ikan Gabus dimakan Burung Bangau."
+            }
+        ];
+
+        const stage3Data = [
+            {
+                badge: "Kebersihan Lingkungan Madrasah",
+                icon: "🗑️",
+                question: "Saat jam istirahat di MIS Muslimin Cikadu, kamu melihat banyak bungkus jajanan plastik berserakan di dekat taman bunga madrasah. Apa tindakan terbaik yang harus kamu lakukan?",
+                options: [
+                    { text: "Membiarkannya saja karena nanti akan disapu oleh petugas kebersihan.", correct: false },
+                    { text: "Memungut sampah plastik tersebut dan membuangnya ke tempat sampah terpilah, lalu mengajak teman ikut menjaga kebersihan.", correct: true },
+                    { text: "Menendang sampah plastik ke dalam selokan agar tidak terlihat di halaman.", correct: false }
+                ],
+                explanation: "MasyaAllah, tindakan terpuji! Membuang sampah pada tempatnya mencegah pencemaran tanah dan air serta menjaga taman madrasah tetap asri."
+            },
+            {
+                badge: "Keseimbangan Rantai Makanan",
+                icon: "🦉",
+                question: "Di sawah sekitar desa, populasi tikus meningkat pesat sehingga merusak tanaman padi petani. Mengapa hal tersebut bisa terjadi dalam ekosistem?",
+                options: [
+                    { text: "Karena burung hantu dan ular sebagai pemangsa alami tikus banyak diburu manusia.", correct: true },
+                    { text: "Karena tanaman padi terlalu banyak disiram air hujan.", correct: false },
+                    { text: "Karena belalang berteman akrab dengan tikus sawah.", correct: false }
+                ],
+                explanation: "Benar! Jika pemangsa (burung hantu/ular) berkurang akibat perburuan, populasi tikus akan meledak dan merusak keseimbangan ekosistem sawah."
+            },
+            {
+                badge: "Penghijauan & Amanah Alam",
+                icon: "🌳",
+                question: "Halaman belakang madrasah tampak gersang dan panas saat siang hari. Kegiatan siswa kelas V MI yang paling tepat untuk memperbaiki kondisi lingkungan tersebut adalah...",
+                options: [
+                    { text: "Menebang sisa pohon kecil agar halaman lebih luas untuk bermain bola.", correct: false },
+                    { text: "Mengadakan gerakan menanam pohon pelindung dan merawat tanaman apotek hidup bersama guru.", correct: true },
+                    { text: "Menutup seluruh tanah halaman dengan semen agar tidak ada rumput yang tumbuh.", correct: false }
+                ],
+                explanation: "Tepat sekali! Menanam dan merawat pohon menghasilkan oksigen, menyejukkan udara, serta menjaga resapan air tanah."
+            },
+            {
+                badge: "Hemat Energi & Air",
+                icon: "💧",
+                question: "Setelah selesai berwudu di tempat wudu madrasah untuk salat Zuhur berjamaah, kamu melihat keran air masih mengalir deras karena lupa ditutup temanmu. Sikapmu adalah...",
+                options: [
+                    { text: "Segera menutup keran air dengan rapat agar air bersih tidak terbuang sia-sia.", correct: true },
+                    { text: "Langsung masuk ke musala tanpa memedulikan keran yang terbuka.", correct: false },
+                    { text: "Bermain semprotan air bersama teman-teman.", correct: false }
+                ],
+                explanation: "Alhamdulillah! Menghemat air bersih adalah perilaku bijak menjaga sumber daya alam dan bentuk rasa syukur atas nikmat Allah Swt."
+            }
+        ];
+
+        // --- 3. VARIABEL STATUS PERMAINAN ---
+        let currentStage = 0;
+        let s1Index = 0;
+        let s2Index = 0;
+        let s3Index = 0;
+        let score = 0;
+        let correctCount = 0;
+        const totalQuestions = stage1Data.length + stage2Data.length + stage3Data.length;
+
+        let s2SelectedOrder = [];
+        let s2ShuffledChoices = [];
+
+        // --- 4. FUNGSI NAVIGASI LAYAR ---
+        function showScreen(screenId) {
+            const screens = ['screen-start', 'screen-stage1', 'screen-stage2', 'screen-stage3', 'screen-end'];
+            screens.forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+
+            const header = document.getElementById('game-header');
+            if (screenId === 'screen-start' || screenId === 'screen-end') {
+                header.classList.add('hidden');
+            } else {
+                header.classList.remove('hidden');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateHeaderProgress(stageNum) {
+            const steps = [1, 2, 3];
+            steps.forEach(num => {
+                const el = document.getElementById(`step-${num}`);
+                if (num < stageNum) {
+                    el.className = "flex items-center gap-1 px-2 py-1 rounded-lg font-bold text-[11px] sm:text-sm bg-emerald-100 text-emerald-700 border border-emerald-300 whitespace-nowrap";
+                } else if (num === stageNum) {
+                    el.className = "flex items-center gap-1 px-2 py-1 rounded-lg font-bold text-[11px] sm:text-sm bg-emerald-500 text-white whitespace-nowrap";
+                } else {
+                    el.className = "flex items-center gap-1 px-2 py-1 rounded-lg font-bold text-[11px] sm:text-sm bg-slate-200 text-slate-500 whitespace-nowrap";
+                }
+            });
+        }
+
+        function addScore(points) {
+            score += points;
+            document.getElementById('live-score').textContent = score;
+        }
+
+        // --- 5. MULAI & ULANGI PERMAINAN ---
+        function startGame() {
+            playSound('click');
+            score = 0;
+            correctCount = 0;
+            s1Index = 0;
+            s2Index = 0;
+            s3Index = 0;
+            document.getElementById('live-score').textContent = '0';
+            startStage1();
+        }
+
+        function restartGame() {
+            startGame();
+        }
+
+        function confirmReturnHome() {
+            playSound('click');
+            document.getElementById('home-confirm-modal').classList.remove('hidden');
+        }
+
+        function closeHomeModal() {
+            playSound('click');
+            document.getElementById('home-confirm-modal').classList.add('hidden');
+        }
+
+        function goHomeConfirmed() {
+            playSound('click');
+            document.getElementById('home-confirm-modal').classList.add('hidden');
+            showScreen('screen-start');
+        }
+
+        // --- 6. LOGIKA BABAK 1 (BIOTIK & ABIOTIK) ---
+        function startStage1() {
+            currentStage = 1;
+            showScreen('screen-stage1');
+            updateHeaderProgress(1);
+            renderStage1Question();
+        }
+
+        function renderStage1Question() {
+            const item = stage1Data[s1Index];
+            document.getElementById('s1-progress').textContent = `${s1Index + 1} / ${stage1Data.length}`;
+            document.getElementById('s1-illustration').innerHTML = item.svg;
+            document.getElementById('s1-item-name').textContent = item.name;
+            document.getElementById('s1-item-hint').textContent = item.hint;
+        }
+
+        function checkStage1(choice) {
+            const item = stage1Data[s1Index];
+            const isCorrect = (choice === item.type);
+
+            if (isCorrect) {
+                playSound('correct');
+                correctCount++;
+                addScore(10);
+                showFeedback(true, "MasyaAllah, Tepat Sekali! 🌟", item.explanation);
+            } else {
+                playSound('wrong');
+                const card = document.getElementById('s1-card');
+                card.classList.add('animate-shake');
+                setTimeout(() => card.classList.remove('animate-shake'), 400);
+                showFeedback(false, "Yuk, Belajar Lagi! 💡", item.explanation);
+            }
+        }
+
+        // --- 7. LOGIKA BABAK 2 (RANTAI MAKANAN) ---
+        function startStage2() {
+            currentStage = 2;
+            showScreen('screen-stage2');
+            updateHeaderProgress(2);
+            renderStage2Question();
+        }
+
+        function renderStage2Question() {
+            const quest = stage2Data[s2Index];
+            document.getElementById('s2-title').textContent = `${quest.ecosystem}`;
+            document.getElementById('s2-progress').textContent = `${s2Index + 1} / ${stage2Data.length}`;
+            
+            s2SelectedOrder = [];
+            s2ShuffledChoices = [...quest.items].sort(() => Math.random() - 0.5);
+            
+            renderStage2Board();
+        }
+
+        function renderStage2Board() {
+            const slotsContainer = document.getElementById('s2-slots');
+            const choicesContainer = document.getElementById('s2-choices');
+
+            slotsContainer.innerHTML = '';
+            const labels = ["1. Produsen", "2. Konsumen I", "3. Konsumen II", "4. Konsumen III"];
+            for (let i = 0; i < 4; i++) {
+                const selectedItem = s2SelectedOrder[i];
+                if (selectedItem) {
+                    slotsContainer.innerHTML += `
+                        <div class="bg-white border-2 border-emerald-400 rounded-2xl p-2.5 text-center shadow-sm animate-pop">
+                            <span class="text-[10px] font-extrabold text-emerald-600 uppercase block mb-0.5">${labels[i]}</span>
+                            <div class="text-3xl mb-0.5">${selectedItem.emoji}</div>
+                            <div class="font-bold text-slate-800 text-xs">${selectedItem.name}</div>
+                        </div>
+                    `;
+                } else {
+                    slotsContainer.innerHTML += `
+                        <div class="bg-amber-100/60 border-2 border-dashed border-amber-300 rounded-2xl p-2.5 text-center flex flex-col items-center justify-center min-h-[90px]">
+                            <span class="text-[10px] font-extrabold text-amber-700 uppercase block mb-0.5">${labels[i]}</span>
+                            <span class="text-xl text-amber-300 font-bold">?</span>
+                        </div>
+                    `;
+                }
+            }
+
+            choicesContainer.innerHTML = '';
+            s2ShuffledChoices.forEach(item => {
+                const isAlreadySelected = s2SelectedOrder.some(sel => sel.id === item.id);
+                if (isAlreadySelected) {
+                    choicesContainer.innerHTML += `
+                        <div class="bg-slate-100 border-2 border-slate-200 rounded-2xl p-3 text-center opacity-40">
+                            <div class="text-3xl sm:text-4xl mb-1">${item.emoji}</div>
+                            <div class="font-bold text-slate-500 text-xs sm:text-sm">${item.name}</div>
+                            <span class="text-[10px] font-bold text-emerald-600">Terpilih ✓</span>
+                        </div>
+                    `;
+                } else {
+                    choicesContainer.innerHTML += `
+                        <button type="button" onclick="selectStage2Item(${item.id})" class="btn-3d bg-white active:bg-amber-50 border-2 border-amber-300 rounded-2xl p-3 sm:p-4 text-center">
+                            <div class="text-3xl sm:text-5xl mb-1.5">${item.emoji}</div>
+                            <div class="font-title font-bold text-slate-800 text-xs sm:text-base">${item.name}</div>
+                        </button>
+                    `;
+                }
+            });
+        }
+
+        function selectStage2Item(itemId) {
+            const quest = stage2Data[s2Index];
+            const item = quest.items.find(i => i.id === itemId);
+            if (!item || s2SelectedOrder.length >= 4) return;
+
+            playSound('click');
+            s2SelectedOrder.push(item);
+            renderStage2Board();
+
+            if (s2SelectedOrder.length === 4) {
+                setTimeout(() => {
+                    const isOrderCorrect = s2SelectedOrder.every((val, idx) => val.id === idx + 1);
+                    if (isOrderCorrect) {
+                        playSound('correct');
+                        correctCount++;
+                        addScore(15);
+                        showFeedback(true, "Rantai Makanan Sempurna! 🔗", quest.explanation);
+                    } else {
+                        playSound('wrong');
+                        showFeedback(false, "Urutannya Belum Tepat! 🤔", quest.explanation);
+                    }
+                }, 300);
+            }
+        }
+
+        function resetStage2Selection() {
+            playSound('click');
+            s2SelectedOrder = [];
+            renderStage2Board();
+        }
+
+        // --- 8. LOGIKA BABAK 3 (PAHLAWAN PENJAGA ALAM) ---
+        function startStage3() {
+            currentStage = 3;
+            showScreen('screen-stage3');
+            updateHeaderProgress(3);
+            renderStage3Question();
+        }
+
+        function renderStage3Question() {
+            const quest = stage3Data[s3Index];
+            document.getElementById('s3-progress').textContent = `${s3Index + 1} / ${stage3Data.length}`;
+            document.getElementById('s3-badge').textContent = quest.badge;
+            document.getElementById('s3-icon').textContent = quest.icon;
+            document.getElementById('s3-question').textContent = quest.question;
+
+            const optionsContainer = document.getElementById('s3-options');
+            optionsContainer.innerHTML = '';
+            const letters = ['A', 'B', 'C'];
+
+            quest.options.forEach((opt, idx) => {
+                optionsContainer.innerHTML += `
+                    <button type="button" onclick="checkStage3(${idx})" class="btn-3d w-full bg-white active:bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-3.5 sm:p-4 text-left flex items-center gap-3">
+                        <span class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-100 text-emerald-800 font-title font-bold text-base sm:text-lg flex items-center justify-center shrink-0 border border-emerald-300">
+                            ${letters[idx]}
+                        </span>
+                        <span class="font-bold text-slate-700 text-xs sm:text-base leading-snug">${opt.text}</span>
+                    </button>
+                `;
+            });
+        }
+
+        function checkStage3(optionIndex) {
+            const quest = stage3Data[s3Index];
+            const chosen = quest.options[optionIndex];
+
+            if (chosen.correct) {
+                playSound('correct');
+                correctCount++;
+                addScore(15);
+                showFeedback(true, "Pahlawan Alam Sejati! 🌱", quest.explanation);
+            } else {
+                playSound('wrong');
+                showFeedback(false, "Kurang Tepat, Sahabat Alam! 🌿", quest.explanation);
+            }
+        }
+
+        // --- 9. SISTEM MODAL UMPAN BALIK & TOMBOL LANJUT ---
+        function showFeedback(isCorrect, title, message) {
+            const modal = document.getElementById('feedback-modal');
+            const box = document.getElementById('feedback-box');
+            const emojiEl = document.getElementById('fb-emoji');
+            const titleEl = document.getElementById('fb-title');
+            const msgEl = document.getElementById('fb-message');
+            const btnEl = document.getElementById('fb-next-btn');
+
+            if (isCorrect) {
+                box.className = "bg-white rounded-3xl max-w-md w-full p-5 sm:p-7 text-center shadow-2xl border-4 border-emerald-400 animate-pop";
+                emojiEl.textContent = "🎉";
+                titleEl.className = "font-title text-xl sm:text-3xl font-bold text-emerald-700 mb-2";
+                btnEl.className = "btn-3d w-full bg-emerald-500 text-white font-title text-lg sm:text-xl font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2";
+            } else {
+                box.className = "bg-white rounded-3xl max-w-md w-full p-5 sm:p-7 text-center shadow-2xl border-4 border-amber-400 animate-pop";
+                emojiEl.textContent = "💡";
+                titleEl.className = "font-title text-xl sm:text-3xl font-bold text-amber-700 mb-2";
+                btnEl.className = "btn-3d w-full bg-amber-500 text-white font-title text-lg sm:text-xl font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2";
+            }
+
+            titleEl.textContent = title;
+            msgEl.textContent = message;
+            modal.classList.remove('hidden');
+        }
+
+        function handleNextStep() {
+            playSound('click');
+            document.getElementById('feedback-modal').classList.add('hidden');
+
+            if (currentStage === 1) {
+                s1Index++;
+                if (s1Index < stage1Data.length) {
+                    renderStage1Question();
+                } else {
+                    startStage2();
+                }
+            } else if (currentStage === 2) {
+                s2Index++;
+                if (s2Index < stage2Data.length) {
+                    renderStage2Question();
+                } else {
+                    startStage3();
+                }
+            } else if (currentStage === 3) {
+                s3Index++;
+                if (s3Index < stage3Data.length) {
+                    renderStage3Question();
+                } else {
+                    finishGame();
+                }
+            }
+        }
+
+        // --- 10. HALAMAN PENUTUP & PERHITUNGAN NILAI AKHIR ---
+        function finishGame() {
+            currentStage = 4;
+            playSound('win');
+            showScreen('screen-end');
+
+            const finalGrade = Math.round((correctCount / totalQuestions) * 100);
+            document.getElementById('final-score').textContent = finalGrade;
+            document.getElementById('final-stats').textContent = `Jawaban Benar: ${correctCount} dari ${totalQuestions} Tantangan (Skor Poin: ${score})`;
+
+            let stars = "⭐⭐⭐";
+            let predicate = "Predikat: Khalifah Penjaga Alam Terbaik! 🌟";
+
+            if (finalGrade >= 85) {
+                stars = "⭐⭐⭐";
+                predicate = "Predikat: Khalifah Penjaga Alam Terbaik! 🌟";
+            } else if (finalGrade >= 65) {
+                stars = "⭐⭐";
+                predicate = "Predikat: Penjelajah Ekosistem Hebat! 🌿";
+            } else {
+                stars = "⭐";
+                predicate = "Predikat: Sahabat Alam Semangat Belajar! 🌱";
+            }
+
+            document.getElementById('final-stars').textContent = stars;
+            document.getElementById('final-predicate').textContent = predicate;
+        }
+    </script>
+</body>
+</html>
